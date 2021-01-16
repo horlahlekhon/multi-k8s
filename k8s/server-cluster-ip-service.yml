@@ -1,0 +1,12 @@
+# cluster ip service for the server pod, serves as interface for accessing the server
+apiVersion: v1
+kind: Service 
+metadata:
+  name: server-cluster-ip-service
+spec:
+  type: ClusterIP
+  selector:
+    component: server # this is a cluster ip for the client, so the selector makes it points to the component web which is the server
+  ports:
+    - port: 5000
+      targetPort: 5000

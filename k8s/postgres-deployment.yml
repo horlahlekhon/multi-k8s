@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment 
+metadata:
+  name: postgres-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: postgres 
+  template:
+    metadata:
+      labels: 
+        component: postgres
+    spec:
+      volumes:
+      # attach a claim to the deployment pod
+        - name:  postgres-storage
+          persistentVolumeClaim:
+              claimName: database-persistence-volume-claim
+      containers:
+        - name: postgres
+          image: postgres
+          ports:
+            - containerPort: 5432
+            # specify the storage to mount into the container, here we are using the claim attached to the pod above
+          volumeMounts:
+            - name:  postgres-storage # must be the name of the volume declared in volumes
+              mountPath: /var/lib/postgresql/data # where inside the container should this storage the mounted to
+              # this means that any data that is stored at the mountPath inside the container, should be stored inside this specified
+              # folder inside the PVC
+              subPath: postgresql 
+          env:
+            - name:  POSTGRES_PASSWORD
+              valueFrom:
+                  secretKeyRef:
+                    key: PGPASSWORD
+                    name: pgpassword
